@@ -207,6 +207,14 @@
                             }
                         ]
                     },
+                    "iam_permissions": [
+                        {
+                            "service_name": "cloud-object-storage",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        }
+                    ],
                     "architecture": {
                         "features": [
                             {
@@ -228,7 +236,82 @@
                                 "description": "This architecture supports creating and configuring an IBM Cloud Object Storage instance."
                             }
                         ]
-                    }
+                    },
+                    "configuration": [
+                        {
+                            "key": "access_tags",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "A list of access tags to apply to the Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_instance_name",
+                            "type": "string",
+                            "default_value": "cos-instance",
+                            "description": "The name of the IBM Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_plan",
+                            "type": "string",
+                            "default_value": "standard",
+                            "description": "Plan to be used for creating Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_tags",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "Optional list of tags to be added to Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "existing_resource_group",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Whether to use an existing resource group.",
+                            "required": false
+                        },
+                        {
+                            "key": "ibmcloud_api_key",
+                            "type": "password",
+                            "description": "The IBM Cloud platform API key to deploy IAM-enabled resources.",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_group_name",
+                            "type": "string",
+                            "default_value": "__NOT_SET__",
+                            "description": "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned.",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_keys",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "The definition of any resource keys to be generated.",
+                            "required": false
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "key": "resource_keys",
+                            "description": "List of resource keys"
+                        },
+                        {
+                            "key": "resource_group_id",
+                            "description": "Resource Group ID"
+                        },
+                        {
+                            "key": "cos_instance_id",
+                            "description": "COS instance id"
+                        },
+                        {
+                            "key": "cos_instance_guid",
+                            "description": "COS instance guid"
+                        }
+                    ]
                 },
                 {
                     "label": "Secure Cross Regional Bucket",
@@ -240,8 +323,8 @@
                             "flavors": [
                                 "instance"
                             ],
-                            "catalog_id": "7df1e4ca-d54c-4fd0-82ce-3d13247308cd",
-                            "id": "68921490-2778-4930-ac6d-bae7be6cd958",
+                            "catalog_id": "1458f7b3-28d4-49bf-8c32-7434f9320774",
+                            "id": "ca845155-d3e6-4740-ad29-f155addb4991",
                             "name": "deploy-arch-ibm-cos",
                             "version": ">= v8.1.4"
                         }
@@ -255,6 +338,20 @@
                             }
                         ]
                     },
+                    "iam_permissions": [
+                        {
+                            "service_name": "cloud-object-storage",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        },
+                        {
+                            "service_name": "kms",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        }
+                    ],
                     "architecture": {
                         "features": [
                             {
@@ -304,8 +401,8 @@
                             "flavors": [
                                 "instance"
                             ],
-                            "catalog_id": "7df1e4ca-d54c-4fd0-82ce-3d13247308cd",
-                            "id": "68921490-2778-4930-ac6d-bae7be6cd958",
+                            "catalog_id": "1458f7b3-28d4-49bf-8c32-7434f9320774",
+                            "id": "ca845155-d3e6-4740-ad29-f155addb4991",
                             "name": "deploy-arch-ibm-cos",
                             "version": ">= v8.1.4"
                         }
@@ -360,7 +457,96 @@
                                 "description": "This architecture supports creating and configuring a regional bucket."
                             }
                         ]
-                    }
+                    },
+                    "iam_permissions": [
+                        {
+                            "service_name": "cloud-object-storage",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        },
+                        {
+                            "service_name": "kms",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        }
+                    ],
+                    "configuration": [
+                        {
+                            "key": "access_tags",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "A list of access tags to apply to the Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_instance_name",
+                            "type": "string",
+                            "default_value": "cos-instance",
+                            "description": "The name of the IBM Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_plan",
+                            "type": "string",
+                            "default_value": "standard",
+                            "description": "Plan to be used for creating Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "cos_tags",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "Optional list of tags to be added to Cloud Object Storage instance.",
+                            "required": false
+                        },
+                        {
+                            "key": "existing_resource_group",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Whether to use an existing resource group.",
+                            "required": false
+                        },
+                        {
+                            "key": "ibmcloud_api_key",
+                            "type": "password",
+                            "description": "The IBM Cloud platform API key to deploy IAM-enabled resources.",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_group_name",
+                            "type": "string",
+                            "default_value": "__NOT_SET__",
+                            "description": "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned.",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_keys",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "The definition of any resource keys to be generated.",
+                            "required": false
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "key": "resource_keys",
+                            "description": "List of resource keys"
+                        },
+                        {
+                            "key": "resource_group_id",
+                            "description": "Resource Group ID"
+                        },
+                        {
+                            "key": "cos_instance_id",
+                            "description": "COS instance id"
+                        },
+                        {
+                            "key": "cos_instance_guid",
+                            "description": "COS instance guid"
+                        }
+                    ]
                 }
             ]
         }
