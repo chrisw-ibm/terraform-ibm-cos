@@ -159,6 +159,7 @@
             "name": "deploy-arch-ibm-cos",
             "label": "Cloud Object Storage",
             "product_kind": "solution",
+            "version": "8.2.9",
             "tags": [
                 "dev_ops",
                 "target_terraform",
