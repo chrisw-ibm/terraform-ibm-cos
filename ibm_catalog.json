@@ -395,11 +395,344 @@
                     "label": "Secure Regional Bucket",
                     "name": "secure-regional-bucket",
                     "working_directory": "solutions/secure-regional-bucket",
+                    "install_type": "solution",
+                    "compliance": {
+                        "authority": "scc-v3",
+                        "profiles": [
+                            {
+                                "profile_name": "IBM Cloud Framework for Financial Services",
+                                "profile_version": "1.6.0"
+                            }
+                        ]
+                    },
+                    "architecture": {
+                        "features": [
+                            {
+                                "title": "Create secure Regional Bucket",
+                                "description": "Create a Secure Regional Bucket."
+                            },
+                            {
+                                "title": "Configure bucket retention",
+                                "description": "Configure retention policies at the IBM Cloud Object Storage bucket level."
+                            },
+                            {
+                                "title": "Enable object versioning",
+                                "description": "Supports enabling object versioning to keep multiple versions of an object in a bucket."
+                            },
+                            {
+                                "title": "Add archive policies",
+                                "description": "Add archive policies on the bucket."
+                            },
+                            {
+                                "title": "Record Activity Tracker events",
+                                "description": "Integrate Activity Tracker to track events."
+                            },
+                            {
+                                "title": "Monitor data",
+                                "description": "Integrate with the IBM Cloud Monitoring service to monitor your Object Storage data."
+                            },
+                            {
+                                "title": "Encrypt data with key management services",
+                                "description": "Supports key management encryption (BYOK and KYOK), including service-to-service authorization policies with KMS."
+                            }
+                        ],
+                        "diagrams": [
+                            {
+                                "diagram": {
+                                    "caption": "IBM Cloud Object Storage Solution",
+                                    "url": "https://raw.githubusercontent.com/terraform-ibm-modules/terraform-ibm-cos/main/reference-architectures/secure-regional-bucket.svg",
+                                    "type": "image/svg+xml"
+                                },
+                                "description": "This architecture supports creating and configuring a regional bucket."
+                            }
+                        ]
+                    },
+                    "iam_permissions": [
+                        {
+                            "service_name": "cloud-object-storage",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        },
+                        {
+                            "service_name": "kms",
+                            "role_crns": [
+                                "crn:v1:bluemix:public:iam::::serviceRole:Manager"
+                            ]
+                        }
+                    ],
+                    "configuration": [
+                        {
+                            "key": "ibmcloud_api_key",
+                            "type": "password",
+                            "description": "The IBM Cloud platform API key to deploy IAM-enabled resources.",
+                            "required": true
+                        },
+                        {
+                            "key": "bucket_name",
+                            "type": "string",
+                            "default_value": "__NOT_SET__",
+                            "description": "The name to give the newly provisioned Object Storage bucket. ",
+                            "required": true
+                        },
+                        {
+                            "key": "add_bucket_name_suffix",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Add random generated suffix (4 characters long) to the newly provisioned Object Storage bucket name (Optional).",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_group_name",
+                            "type": "string",
+                            "default_value": "Default",
+                            "description": "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned.",
+                            "required": true
+                        },
+                        {
+                            "key": "existing_resource_group",
+                            "type": "boolean",
+                            "default_value": "true",
+                            "description": "Whether to use an existing resource group.",
+                            "required": true
+                        },
+                        {
+                            "key": "activity_tracker_crn",
+                            "type": "string",
+                            "default_value": "__NULL__",
+                            "description": "Activity tracker crn for Object Storage bucket (Optional)",
+                            "required": false
+                        },
+                        {
+                            "key": "monitoring_crn",
+                            "type": "string",
+                            "default_value": "__NULL__",
+                            "description": "IBM Cloud Monitoring crn for Object Storage bucket (Optional)",
+                            "required": false
+                        },
+                        {
+                            "key": "archive_days",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Specifies the number of days when the archive rule action takes effect. This must be set to null when when using var.cross_region_location as archive data is not supported with this feature.",
+                            "required": false
+                        },
+                        {
+                            "key": "archive_type",
+                            "type": "string",
+                            "default_value": "Glacier",
+                            "description": "Specifies the storage class or archive type to which you want the object to transition. ",
+                            "required": false
+                        },
+                        {
+                            "key": "bucket_access_tags",
+                            "type": "array",
+                            "default_value": "[]",
+                            "description": "A list of access tags to apply to the Cloud Object Storage instance bucket.",
+                            "required": false
+                        },
+                        {
+                            "key": "bucket_storage_class",
+                            "type": "string",
+                            "default_value": "smart",
+                            "description": "The storage class of the newly provisioned Object Storage bucket.  Supported values are `standard`, `vault`, `cold`, `smart` and `onerate_active`.",
+                            "required": false
+                        },
+                        {
+                            "key": "expire_days",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Specifies the number of days when the expire rule action takes effect. ",
+                            "required": false
+                        },
+                        {
+                            "key": "force_delete",
+                            "type": "boolean",
+                            "default_value": true,
+                            "description": "Deletes all the objects in the Object Storage Bucket before bucket is deleted.",
+                            "required": false
+                        },
+                        {
+                            "key": "hard_quota",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Sets a maximum amount of storage (in bytes) available for a bucket. If it is set to `null` then quota is disabled.",
+                            "required": false
+                        },
+                        {
+                            "key": "key_name",
+                            "type": "string",
+                            "default_value": "cos-encryption-key",
+                            "description": "The name to give the Key which will be created for the Object Storage bucket. Not used if supplying an existing Key.",
+                            "required": false
+                        },
+                        {
+                            "key": "key_ring_name",
+                            "type": "string",
+                            "default_value": "cos-encrypt-keys",
+                            "description": "The name to give the Key Ring which will be created for the Object Storage bucket Key. Not used if supplying an existing Key.",
+                            "required": false
+                        },
+                        {
+                            "key": "kms_endpoint_type",
+                            "type": "string",
+                            "default_value": "private",
+                            "description": "The type of endpoint to use to communicate with the KMS instance. Allowed values are `public` or `private` (default).",
+                            "required": false
+                        },
+                        {
+                            "key": "kms_region",
+                            "type": "string",
+                            "default_value": "us-south",
+                            "description": "The region in which KMS instance exists.",
+                            "required": true
+                        },
+                        {
+                            "key": "management_endpoint_type_for_bucket",
+                            "type": "string",
+                            "default_value": "private",
+                            "description": "The type of endpoint for the IBM terraform provider to use to manage the bucket. (public, private or direct)",
+                            "required": false
+                        },
+                        {
+                            "key": "object_lock_duration_days",
+                            "type": "number",
+                            "default_value": 0,
+                            "description": "Specifies the default number of days for the retention lock duration. When setting 'object_lock_duration_days' do not set 'object_lock_duration_years'. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_lock_duration_years",
+                            "type": "number",
+                            "default_value": 0,
+                            "description": "Specifies the default number of years for the retention lock duration. When setting 'object_lock_duration_years' do not set 'object_lock_duration_days'. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_locking_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Specifies if an object lock configuration should be created. Requires 'object_versioning_enabled' to be true. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_versioning_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Enable object versioning to keep multiple versions of an object in a bucket. Cannot be used with retention rule. ",
+                            "required": false
+                        },
+                        {
+                            "key": "region",
+                            "type": "string",
+                            "default_value": "us-south",
+                            "description": "The region to provision the IBM Cloud Object Storage regional bucket is provisioned.",
+                            "required": true
+                        },
+                        {
+                            "key": "retention_default",
+                            "type": "number",
+                            "default_value": 90,
+                            "description": "Specifies default duration of time an object that can be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Retention enabled for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_maximum",
+                            "type": "number",
+                            "default_value": 350,
+                            "description": "Specifies maximum duration of time an object that can be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_minimum",
+                            "type": "number",
+                            "default_value": 90,
+                            "description": "Specifies minimum duration of time an object must be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_permanent",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Specifies a permanent retention status either enable or disable for Object Storage bucket. ",
+                            "required": false
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "key": "resource_group_name",
+                            "description": "Resource group name"
+                        },
+                        {
+                            "key": "resource_group_id",
+                            "description": "Resource group ID"
+                        },
+                        {
+                            "key": "cos_instance_id",
+                            "description": "COS instance id"
+                        },
+                        {
+                            "key": "cos_instance_guid",
+                            "description": "COS instance guid"
+                        },
+                        {
+                            "key": "cos_instance_name",
+                            "description": "COS instance name"
+                        },
+                        {
+                            "key": "cos_instance_crn",
+                            "description": "COS instance crn"
+                        },
+                        {
+                            "key": "s3_endpoint_private",
+                            "description": "private s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "s3_endpoint_public",
+                            "description": "public s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "s3_endpoint_direct",
+                            "description": "direct s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "bucket_id",
+                            "description": "id of the bucket"
+                        },
+                        {
+                            "key": "bucket_crn",
+                            "description": "crn of the bucket"
+                        },
+                        {
+                            "key": "bucket_name",
+                            "description": "name of the bucket"
+                        },
+                        {
+                            "key": "bucket_storage_class",
+                            "description": "bucket storage class"
+                        },
+                        {
+                            "key": "kms_key_crn",
+                            "description": "kms key crn used to encrypt the bucket"
+                        }
+                    ]
+                },
+                {
+                    "label": "Additional Secure Regional Bucket",
+                    "name": "additional-secure-regional-bucket",
+                    "working_directory": "solutions/secure-regional-bucket",
                     "install_type": "extension",
                     "dependencies": [
                         {
                             "flavors": [
-                                "instance"
+                                "secure-regional-bucket"
                             ],
                             "catalog_id": "1458f7b3-28d4-49bf-8c32-7434f9320774",
                             "id": "ca845155-d3e6-4740-ad29-f155addb4991",
@@ -474,69 +807,253 @@
                     ],
                     "configuration": [
                         {
-                            "key": "access_tags",
-                            "type": "array",
-                            "default_value": "[]",
-                            "description": "A list of access tags to apply to the Cloud Object Storage instance.",
-                            "required": false
-                        },
-                        {
-                            "key": "cos_instance_name",
-                            "type": "string",
-                            "default_value": "cos-instance",
-                            "description": "The name of the IBM Cloud Object Storage instance.",
-                            "required": false
-                        },
-                        {
-                            "key": "cos_plan",
-                            "type": "string",
-                            "default_value": "standard",
-                            "description": "Plan to be used for creating Cloud Object Storage instance.",
-                            "required": false
-                        },
-                        {
-                            "key": "cos_tags",
-                            "type": "array",
-                            "default_value": "[]",
-                            "description": "Optional list of tags to be added to Cloud Object Storage instance.",
-                            "required": false
-                        },
-                        {
-                            "key": "existing_resource_group",
-                            "type": "boolean",
-                            "default_value": false,
-                            "description": "Whether to use an existing resource group.",
-                            "required": false
-                        },
-                        {
                             "key": "ibmcloud_api_key",
                             "type": "password",
                             "description": "The IBM Cloud platform API key to deploy IAM-enabled resources.",
                             "required": true
                         },
                         {
-                            "key": "resource_group_name",
+                            "key": "bucket_name",
                             "type": "string",
                             "default_value": "__NOT_SET__",
-                            "description": "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned.",
+                            "description": "The name to give the newly provisioned Object Storage bucket. ",
                             "required": true
                         },
                         {
-                            "key": "resource_keys",
+                            "key": "add_bucket_name_suffix",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Add random generated suffix (4 characters long) to the newly provisioned Object Storage bucket name (Optional).",
+                            "required": true
+                        },
+                        {
+                            "key": "resource_group_name",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/existing_resource_name",
+                            "description": "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned.",
+                            "required": false
+                        },
+                        {
+                            "key": "existing_resource_group",
+                            "type": "boolean",
+                            "default_value": "ref:../*/outputs/existing_resource_group",
+                            "description": "Whether to use an existing resource group.",
+                            "required": false
+                        },
+                        {
+                            "key": "activity_tracker_crn",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/activity_tracker_crn",
+                            "description": "Activity tracker crn for Object Storage bucket (Optional)",
+                            "required": false
+                        },
+                        {
+                            "key": "monitoring_crn",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/monitoring_crn",
+                            "description": "IBM Cloud Monitoring crn for Object Storage bucket (Optional)",
+                            "required": false
+                        },
+                        {
+                            "key": "archive_days",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Specifies the number of days when the archive rule action takes effect. This must be set to null when when using var.cross_region_location as archive data is not supported with this feature.",
+                            "required": false
+                        },
+                        {
+                            "key": "archive_type",
+                            "type": "string",
+                            "default_value": "Glacier",
+                            "description": "Specifies the storage class or archive type to which you want the object to transition. ",
+                            "required": false
+                        },
+                        {
+                            "key": "bucket_access_tags",
                             "type": "array",
                             "default_value": "[]",
-                            "description": "The definition of any resource keys to be generated.",
+                            "description": "A list of access tags to apply to the Cloud Object Storage instance bucket.",
                             "required": false
+                        },
+                        {
+                            "key": "bucket_storage_class",
+                            "type": "string",
+                            "default_value": "smart",
+                            "description": "The storage class of the newly provisioned Object Storage bucket.  Supported values are `standard`, `vault`, `cold`, `smart` and `onerate_active`.",
+                            "required": false
+                        },
+                        {
+                            "key": "expire_days",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Specifies the number of days when the expire rule action takes effect. ",
+                            "required": false
+                        },
+                        {
+                            "key": "force_delete",
+                            "type": "boolean",
+                            "default_value": true,
+                            "description": "Deletes all the objects in the Object Storage Bucket before bucket is deleted.",
+                            "required": false
+                        },
+                        {
+                            "key": "hard_quota",
+                            "type": "number",
+                            "default_value": "__NULL__",
+                            "description": "Sets a maximum amount of storage (in bytes) available for a bucket. If it is set to `null` then quota is disabled.",
+                            "required": false
+                        },
+                        {
+                            "key": "key_name",
+                            "type": "string",
+                            "default_value": "cos-encryption-key",
+                            "description": "The name to give the Key which will be created for the Object Storage bucket. Not used if supplying an existing Key.",
+                            "required": false
+                        },
+                        {
+                            "key": "key_ring_name",
+                            "type": "string",
+                            "default_value": "additional-cos-encrypt-key",
+                            "description": "The name to give the Key Ring which will be created for the Object Storage bucket Key. Not used if supplying an existing Key.",
+                            "required": true
+                        },
+                        {
+                            "key": "kms_endpoint_type",
+                            "type": "string",
+                            "default_value": "private",
+                            "description": "The type of endpoint to use to communicate with the KMS instance. Allowed values are `public` or `private` (default).",
+                            "required": false
+                        },
+                        {
+                            "key": "kms_region",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/kms_region",
+                            "description": "The region in which KMS instance exists.",
+                            "required": false
+                        },
+                        {
+                            "key": "management_endpoint_type_for_bucket",
+                            "type": "string",
+                            "default_value": "private",
+                            "description": "The type of endpoint for the IBM terraform provider to use to manage the bucket. (public, private or direct)",
+                            "required": false
+                        },
+                        {
+                            "key": "object_lock_duration_days",
+                            "type": "number",
+                            "default_value": 0,
+                            "description": "Specifies the default number of days for the retention lock duration. When setting 'object_lock_duration_days' do not set 'object_lock_duration_years'. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_lock_duration_years",
+                            "type": "number",
+                            "default_value": 0,
+                            "description": "Specifies the default number of years for the retention lock duration. When setting 'object_lock_duration_years' do not set 'object_lock_duration_days'. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_locking_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Specifies if an object lock configuration should be created. Requires 'object_versioning_enabled' to be true. Only used if 'create_cos_bucket' is true.",
+                            "required": false
+                        },
+                        {
+                            "key": "object_versioning_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Enable object versioning to keep multiple versions of an object in a bucket. Cannot be used with retention rule. ",
+                            "required": false
+                        },
+                        {
+                            "key": "region",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/region",
+                            "description": "The region to provision the IBM Cloud Object Storage regional bucket is provisioned.",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_default",
+                            "type": "number",
+                            "default_value": 90,
+                            "description": "Specifies default duration of time an object that can be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_enabled",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Retention enabled for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_maximum",
+                            "type": "number",
+                            "default_value": 350,
+                            "description": "Specifies maximum duration of time an object that can be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_minimum",
+                            "type": "number",
+                            "default_value": 90,
+                            "description": "Specifies minimum duration of time an object must be kept unmodified for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "retention_permanent",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Specifies a permanent retention status either enable or disable for Object Storage bucket. ",
+                            "required": false
+                        },
+                        {
+                            "key": "create_kms_instance",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Whether to create a kms instance",
+                            "required": false,
+                            "hidden": true
+                        },
+                        {
+                            "key": "create_cos_instance",
+                            "type": "boolean",
+                            "default_value": false,
+                            "description": "Whether to create a cos instance",
+                            "required": false,
+                            "hidden": true
+                        },
+                        {
+                            "key": "existing_cos_instance_id",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/cos_instance_id",
+                            "description": "The ID of an existing Cloud Object Storage instance.",
+                            "required": true
+                        },
+                        {
+                            "key": "existing_kms_guid",
+                            "type": "string",
+                            "default_value": "ref:../*/outputs/kms_guid",
+                            "description": "The GUID of the KMS instance that is used for the Object Storage bucket root key. Required only if a KMS root key is specified and if `skip_iam_authorization_policy` is true.",
+                            "required": true
+                        },
+                        {
+                            "key": "skip_iam_authorization_policy",
+                            "type": "boolean",
+                            "default_value": "true",
+                            "description": "Set to true to skip the creation of an IAM authorization policy that permits the Object Storage instance created to read the encryption key from the KMS instance in `existing_kms_guid`. WARNING: An authorization policy must exist before an encrypted bucket can be created",
+                            "hidden": true
                         }
                     ],
                     "outputs": [
                         {
-                            "key": "resource_keys",
-                            "description": "List of resource keys"
+                            "key": "resource_group_name",
+                            "description": "Resource group name"
                         },
                         {
                             "key": "resource_group_id",
-                            "description": "Resource Group ID"
+                            "description": "Resource group ID"
                         },
                         {
                             "key": "cos_instance_id",
@@ -545,6 +1062,46 @@
                         {
                             "key": "cos_instance_guid",
                             "description": "COS instance guid"
+                        },
+                        {
+                            "key": "cos_instance_name",
+                            "description": "COS instance name"
+                        },
+                        {
+                            "key": "cos_instance_crn",
+                            "description": "COS instance crn"
+                        },
+                        {
+                            "key": "s3_endpoint_private",
+                            "description": "private s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "s3_endpoint_public",
+                            "description": "public s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "s3_endpoint_direct",
+                            "description": "direct s3 endpoint of the bucket"
+                        },
+                        {
+                            "key": "bucket_id",
+                            "description": "id of the bucket"
+                        },
+                        {
+                            "key": "bucket_crn",
+                            "description": "crn of the bucket"
+                        },
+                        {
+                            "key": "bucket_name",
+                            "description": "name of the bucket"
+                        },
+                        {
+                            "key": "bucket_storage_class",
+                            "description": "bucket storage class"
+                        },
+                        {
+                            "key": "kms_key_crn",
+                            "description": "kms key crn used to encrypt the bucket"
                         }
                     ]
                 }

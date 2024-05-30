@@ -2,17 +2,26 @@
 # Secure Regional Bucket
 ##############################################################################
 
-locals {
-  # tflint-ignore: terraform_unused_declarations
-  validate_inputs = var.existing_kms_key_crn == null && var.existing_kms_guid == null ? tobool("A value must be passed for 'existing_kms_guid' if not supplying any value for 'existing_kms_key_crn'.") : true
+module "resource_group" {
+  providers = {
+    ibm = ibm.cos
+  }
+  source                       = "terraform-ibm-modules/resource-group/ibm"
+  version                      = "1.1.5"
+  resource_group_name          = var.existing_resource_group == false ? var.resource_group_name : null
+  existing_resource_group_name = var.existing_resource_group == true ? var.resource_group_name : null
+}
 
+locals {
+  kms_guid = var.create_kms_instance && var.existing_kms_guid != null ? var.existing_kms_guid : module.kms.kms_guid
+  kms_key_crn = var.existing_kms_key_crn != null ? var.existing_kms_key_crn : module.kms.keys[format("%s.%s", var.key_ring_name, var.key_name)].crn
   bucket_config = [{
     access_tags                   = var.bucket_access_tags
     bucket_name                   = var.bucket_name
     kms_encryption_enabled        = true
     add_bucket_name_suffix        = var.add_bucket_name_suffix
-    kms_guid                      = var.existing_kms_guid
-    kms_key_crn                   = var.existing_kms_key_crn != null ? var.existing_kms_key_crn : module.kms[0].keys[format("%s.%s", var.key_ring_name, var.key_name)].crn
+    kms_guid                      = local.kms_guid
+    kms_key_crn                   = local.kms_key_crn
     skip_iam_authorization_policy = var.skip_iam_authorization_policy
     management_endpoint_type      = var.management_endpoint_type_for_bucket
     region_location               = var.region
@@ -63,12 +72,12 @@ module "kms" {
   providers = {
     ibm = ibm.kms
   }
-  count                       = var.existing_kms_key_crn != null ? 0 : 1 # no need to create any KMS resources if passing an existing key
   source                      = "terraform-ibm-modules/kms-all-inclusive/ibm"
   version                     = "4.11.2"
-  create_key_protect_instance = false
+  create_key_protect_instance = var.create_kms_instance
+  existing_kms_instance_guid = var.existing_kms_guid
+  resource_group_id = module.resource_group.resource_group_id
   region                      = var.kms_region
-  existing_kms_instance_guid  = var.existing_kms_guid
   key_ring_endpoint_type      = var.kms_endpoint_type
   key_endpoint_type           = var.kms_endpoint_type
   keys = [
@@ -97,9 +106,13 @@ module "cos" {
   providers = {
     ibm = ibm.cos
   }
+  cos_instance_name   = var.cos_instance_name
   source                   = "../../modules/fscloud"
-  resource_group_id        = null
-  create_cos_instance      = false
+  create_cos_instance = var.create_cos_instance
   existing_cos_instance_id = var.existing_cos_instance_id
-  bucket_configs           = local.bucket_config
+  cos_plan            = var.cos_plan
+  cos_tags            = var.cos_tags
+  access_tags         = var.access_tags
+  resource_group_id   = module.resource_group.resource_group_id
+  bucket_configs      = local.bucket_config
 }

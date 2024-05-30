@@ -8,6 +8,18 @@ variable "ibmcloud_api_key" {
 # KMS variables
 ########################################################################################################################
 
+variable "existing_resource_group" {
+  type        = bool
+  description = "Whether to use an existing resource group."
+  default     = true
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned."
+  default = "Default"
+}
+
 variable "kms_region" {
   type        = string
   default     = "us-south"
@@ -44,13 +56,13 @@ variable "kms_endpoint_type" {
 
 variable "key_ring_name" {
   type        = string
-  default     = "cross-region-key-ring"
+  default     = "bucket-encryption-key-ring"
   description = "The name to give the Key Ring which will be created for the Object Storage bucket Key. Not used if supplying an existing Key."
 }
 
 variable "key_name" {
   type        = string
-  default     = "cross-region-key"
+  default     = "bucket-encryption-key"
   description = "The name to give the Key which will be created for the Object Storage bucket. Not used if supplying an existing Key."
 }
 
@@ -73,6 +85,7 @@ variable "add_bucket_name_suffix" {
 variable "existing_cos_instance_id" {
   description = "The ID of an existing Cloud Object Storage instance."
   type        = string
+  default = null
 }
 
 variable "bucket_access_tags" {
@@ -192,4 +205,43 @@ variable "object_lock_duration_years" {
   description = "Specifies the default number of years for the retention lock duration. When setting 'object_lock_duration_years' do not set 'object_lock_duration_days'. Only used if 'create_cos_bucket' is true."
   type        = number
   default     = 0
+}
+
+
+variable "cos_instance_name" {
+  description = "The name of the IBM Cloud Object Storage instance."
+  type        = string
+  default     = "cos-instance"
+}
+
+
+variable "cos_tags" {
+  description = "Optional list of tags to be added to Cloud Object Storage instance."
+  type        = list(string)
+  default     = []
+}
+
+variable "cos_plan" {
+  description = "Plan to be used for creating Cloud Object Storage instance."
+  type        = string
+  default     = "standard"
+  # Validation happens in the fscloud module
+}
+
+variable "access_tags" {
+  type        = list(string)
+  description = "A list of access tags to apply to the Cloud Object Storage instance."
+  default     = []
+}
+
+variable "create_cos_instance" {
+  description = "Whether to create a cos instance"
+  type        = bool
+  default     = true
+}
+
+variable "create_kms_instance" {
+  description = "Whether to create a kms instance"
+  type        = bool
+  default     = true
 }
