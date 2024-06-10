@@ -132,30 +132,7 @@ locals {
   create_reader_service_id   = var.create_reader_service_id && !var.combine_service_id_roles
   create_writer_service_id   = var.create_writer_service_id && !var.combine_service_id_roles
   create_combined_service_id = var.combine_service_id_roles
-
-  # custom_object_reader_name = "CosObjectReader"
-  # custom_object_reader_display_name = "COS Object Reader"
-  # custom_object_writer_name = "CosObjectWriter"
-  # custom_object_writer_display_name = "COS Object Writer"
 }
-
-# data "ibm_iam_role_actions" "cos_service_roles" {
-#   provider = ibm.cos
-#   count = var.create_reader_service_id || var.create_writer_service_id || var.combine_service_id_roles ? 1 : 0
-#   service = "cloud-object-storage"
-# }
-
-###
-# Create custom roles as a workaround for service policyies not including all service roles see https://github.com/IBM-Cloud/terraform-provider-ibm/issues/4253
-##
-# resource "ibm_iam_custom_role" "object_read" {
-#   provider = ibm.cos
-#   count = var.create_reader_service_id || var.combine_service_id_roles ? 1 : 0
-#   name = local.custom_object_reader_name
-#   display_name = local.custom_object_reader_display_name
-#   service = "cloud-object-storage"
-#   actions = split(",", data.ibm_iam_role_actions.cos_service_roles[0].actions["Object Reader"])
-# }
 
 module "reader_service_id" {
   count = local.create_reader_service_id ? 1 : 0
@@ -170,44 +147,30 @@ module "reader_service_id" {
   iam_service_id_description = local.reader_service_id_description
   iam_service_policies = {
     read_cos_objects = {
-      # roles    = [ibm_iam_custom_role.object_read[0].display_name]
-      roles    = ["Reader"]
-      tags     = []
-      resorces = local.cos_resource_policy
+      roles     = ["Object Reader"]
+      tags      = []
+      resources = local.cos_resource_policy
     }
   }
-  # depends_on = [ ibm_iam_custom_role.object_read[0] ]
 }
-
-# resource "ibm_iam_custom_role" "object_write" {
-#   provider = ibm.cos
-#   count = var.create_writer_service_id || var.combine_service_id_roles ? 1 : 0
-#   name = local.custom_object_writer_name
-#   display_name = local.custom_object_writer_display_name
-#   service = "cloud-object-storage"
-#   actions = split(",", data.ibm_iam_role_actions.cos_service_roles[0].actions["Object Writer"])
-# }
 
 module "writer_service_id" {
   count = local.create_writer_service_id ? 1 : 0
   providers = {
     ibm = ibm.cos
   }
-  source  = "terraform-ibm-modules/iam-service-id/ibm"
-  version = "1.1.2"
-  # insert the 2 required variables here
+  source                     = "terraform-ibm-modules/iam-service-id/ibm"
+  version                    = "1.1.2"
   iam_service_id_name        = local.writer_service_id_name
   iam_service_id_tags        = []
   iam_service_id_description = local.writer_service_id_description
   iam_service_policies = {
     read_cos_objects = {
-      # roles    = [ibm_iam_custom_role.object_write[0].display_name]
-      roles    = ["Writer"]
-      tags     = []
-      resorces = local.cos_resource_policy
+      roles     = ["Object Writer"]
+      tags      = []
+      resources = local.cos_resource_policy
     }
   }
-  # depends_on = [ ibm_iam_custom_role.object_write[0] ]
 }
 
 module "read_write_service_id" {
@@ -215,18 +178,16 @@ module "read_write_service_id" {
   providers = {
     ibm = ibm.cos
   }
-  source  = "terraform-ibm-modules/iam-service-id/ibm"
-  version = "1.1.2"
-  # insert the 2 required variables here
+  source                     = "terraform-ibm-modules/iam-service-id/ibm"
+  version                    = "1.1.2"
   iam_service_id_name        = local.writer_service_id_name
   iam_service_id_tags        = []
   iam_service_id_description = local.writer_service_id_description
   iam_service_policies = {
     readwrite_cos_objects = {
-      # roles    = [ibm_iam_custom_role.object_read[0].display_name, ibm_iam_custom_role.object_write[0].display_name]
-      roles    = ["Reader", "Writer"]
-      tags     = []
-      resorces = local.cos_resource_policy
+      roles     = ["Object Reader", "Object Writer"]
+      tags      = []
+      resources = local.cos_resource_policy
     }
   }
 }
