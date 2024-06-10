@@ -13,7 +13,7 @@ module "resource_group" {
 }
 
 locals {
-  kms_guid = var.create_kms_instance && var.existing_kms_guid != null ? var.existing_kms_guid : module.kms.kms_guid
+  kms_guid    = var.create_kms_instance && var.existing_kms_guid != null ? var.existing_kms_guid : module.kms.kms_guid
   kms_key_crn = var.existing_kms_key_crn != null ? var.existing_kms_key_crn : module.kms.keys[format("%s.%s", var.key_ring_name, var.key_name)].crn
   bucket_config = [{
     access_tags                   = var.bucket_access_tags
@@ -75,8 +75,8 @@ module "kms" {
   source                      = "terraform-ibm-modules/kms-all-inclusive/ibm"
   version                     = "4.11.2"
   create_key_protect_instance = var.create_kms_instance
-  existing_kms_instance_guid = var.existing_kms_guid
-  resource_group_id = module.resource_group.resource_group_id
+  existing_kms_instance_guid  = var.existing_kms_guid
+  resource_group_id           = module.resource_group.resource_group_id
   region                      = var.kms_region
   key_ring_endpoint_type      = var.kms_endpoint_type
   key_endpoint_type           = var.kms_endpoint_type
@@ -106,13 +106,89 @@ module "cos" {
   providers = {
     ibm = ibm.cos
   }
-  cos_instance_name   = var.cos_instance_name
+  cos_instance_name        = var.cos_instance_name
   source                   = "../../modules/fscloud"
-  create_cos_instance = var.create_cos_instance
+  create_cos_instance      = var.create_cos_instance
   existing_cos_instance_id = var.existing_cos_instance_id
-  cos_plan            = var.cos_plan
-  cos_tags            = var.cos_tags
-  access_tags         = var.access_tags
-  resource_group_id   = module.resource_group.resource_group_id
-  bucket_configs      = local.bucket_config
+  cos_plan                 = var.cos_plan
+  cos_tags                 = var.cos_tags
+  access_tags              = var.access_tags
+  resource_group_id        = module.resource_group.resource_group_id
+  bucket_configs           = local.bucket_config
+}
+locals {
+  cos_resource_policy = [{
+    service              = "cloud-object-storage"
+    resource_type        = "bucket"
+    resource_instance_id = module.cos.cos_instance_guid
+    resource             = var.bucket_name
+    resource_group_id    = module.resource_group.resource_group_id
+  }]
+  reader_service_id_name        = "cos-${var.bucket_name}-reader"
+  writer_service_id_name        = "cos-${var.bucket_name}-writer"
+  reader_service_id_description = "Managed by Terraform. DO NOT DELETE! This service Id is used for **reading** from the cos bucket (https://cloud.ibm.com/objectstorage/${urlencode(module.cos.cos_instance_crn)}?bucket=${var.bucket_name}&bucketRegion=${var.region})"
+  writer_service_id_description = "Managed by Terraform. DO NOT DELETE! This service Id is used for **writing** to the cos bucket (https://cloud.ibm.com/objectstorage/${urlencode(module.cos.cos_instance_crn)}?bucket=${var.bucket_name}&bucketRegion=${var.region})"
+
+  create_reader_service_id   = var.create_reader_service_id && !var.combine_service_id_roles
+  create_writer_service_id   = var.create_writer_service_id && !var.combine_service_id_roles
+  create_combined_service_id = var.combine_service_id_roles
+}
+module "reader_service_id" {
+  count = local.create_reader_service_id ? 1 : 0
+  providers = {
+    ibm = ibm.cos
+  }
+  source  = "terraform-ibm-modules/iam-service-id/ibm"
+  version = "1.1.2"
+  # insert the 2 required variables here
+  iam_service_id_name        = local.reader_service_id_name
+  iam_service_id_tags        = []
+  iam_service_id_description = local.reader_service_id_description
+  iam_service_policies = {
+    read_cos_objects = {
+      roles    = ["Object Reader"]
+      tags     = []
+      resorces = local.cos_resource_policy
+    }
+  }
+}
+
+module "writer_service_id" {
+  count = local.create_writer_service_id ? 1 : 0
+  providers = {
+    ibm = ibm.cos
+  }
+  source  = "terraform-ibm-modules/iam-service-id/ibm"
+  version = "1.1.2"
+  # insert the 2 required variables here
+  iam_service_id_name        = local.writer_service_id_name
+  iam_service_id_tags        = []
+  iam_service_id_description = local.writer_service_id_description
+  iam_service_policies = {
+    read_cos_objects = {
+      roles    = ["Object Writer"]
+      tags     = []
+      resorces = local.cos_resource_policy
+    }
+  }
+}
+
+module "read_write_service_id" {
+  count = local.create_combined_service_id ? 1 : 0
+  providers = {
+    ibm = ibm.cos
+  }
+  source  = "terraform-ibm-modules/iam-service-id/ibm"
+  version = "1.1.2"
+  # insert the 2 required variables here
+  iam_service_id_name        = local.writer_service_id_name
+  iam_service_id_tags        = []
+  iam_service_id_description = local.writer_service_id_description
+  iam_service_policies = {
+    readwrite_cos_objects = {
+      roles    = ["Object Reader", "Object Writer"]
+      tags     = []
+      resorces = local.cos_resource_policy
+    }
+  }
 }

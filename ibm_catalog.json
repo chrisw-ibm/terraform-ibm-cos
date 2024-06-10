@@ -159,7 +159,7 @@
             "name": "deploy-arch-ibm-cos",
             "label": "Cloud Object Storage",
             "product_kind": "solution",
-            "version": "8.2.9",
+            "version": "8.2.10",
             "tags": [
                 "dev_ops",
                 "target_terraform",
@@ -671,6 +671,24 @@
                             "default_value": "cos-instance",
                             "description": "The name of the IBM Cloud Object Storage instance.",
                             "required": false
+                        },
+                        {
+                            "key": "create_reader_service_id",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to create a reader service id with access to the bucket"
+                        },
+                        {
+                            "key": "create_writer_service_id",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to create a writer service id with access to the bucket"
+                        },
+                        {
+                            "key": "combine_service_id_roles",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to generate separate service_ids or a service_id with read and write permissions"
                         }
                     ],
                     "outputs": [
@@ -729,6 +747,18 @@
                         {
                             "key": "kms_key_crn",
                             "description": "kms key crn used to encrypt the bucket"
+                        },
+                        {
+                            "key": "reader_service_id",
+                            "description": "The service id with policies for reading from the bucket"
+                        },
+                        {
+                            "key": "writer_service_id",
+                            "description": "The service id with policies for writing to the bucket"
+                        },
+                        {
+                            "key": "readwrite_service_id",
+                            "description": "The service id with policies for reading and writing to the bucket"
                         }
                     ]
                 },
@@ -1054,11 +1084,22 @@
                             "hidden": true
                         },
                         {
-                            "key": "cos_instance_name",
-                            "type": "string",
-                            "default_value": "cos-instance",
-                            "description": "The name of the IBM Cloud Object Storage instance.",
-                            "required": false
+                            "key": "create_reader_service_id",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to create a reader service id with access to the bucket"
+                        },
+                        {
+                            "key": "create_writer_service_id",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to create a writer service id with access to the bucket"
+                        },
+                        {
+                            "key": "combine_service_id_roles",
+                            "type": "boolean",
+                            "default_value": "false",
+                            "description": "whether to generate separate service_ids or a service_id with read and write permissions"
                         }
                     ],
                     "outputs": [
@@ -1117,6 +1158,18 @@
                         {
                             "key": "kms_key_crn",
                             "description": "kms key crn used to encrypt the bucket"
+                        },
+                        {
+                            "key": "reader_service_id",
+                            "description": "The service id with policies for reading from the bucket"
+                        },
+                        {
+                            "key": "writer_service_id",
+                            "description": "The service id with policies for writing to the bucket"
+                        },
+                        {
+                            "key": "readwrite_service_id",
+                            "description": "The service id with policies for reading and writing to the bucket"
                         }
                     ]
                 }

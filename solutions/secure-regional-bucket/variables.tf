@@ -17,7 +17,7 @@ variable "existing_resource_group" {
 variable "resource_group_name" {
   type        = string
   description = "The name of a new or an existing resource group in which Cloud Object Storage instance will be provisioned."
-  default = "Default"
+  default     = "Default"
 }
 
 variable "kms_region" {
@@ -85,7 +85,7 @@ variable "add_bucket_name_suffix" {
 variable "existing_cos_instance_id" {
   description = "The ID of an existing Cloud Object Storage instance."
   type        = string
-  default = null
+  default     = null
 }
 
 variable "bucket_access_tags" {
@@ -244,4 +244,21 @@ variable "create_kms_instance" {
   description = "Whether to create a kms instance"
   type        = bool
   default     = true
+}
+
+variable "create_reader_service_id" {
+  description = "whether to create a reader service id with access to the bucket"
+  type        = bool
+  default     = false
+}
+variable "create_writer_service_id" {
+  description = "whether to create a writer service id with access to the bucket"
+  type        = bool
+  default     = false
+}
+
+variable "combine_service_id_roles" {
+  description = "whether to generate separate service_ids or a service_id with read and write permissions"
+  type        = bool
+  default     = false
 }
