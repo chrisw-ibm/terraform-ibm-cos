@@ -14,7 +14,7 @@ variable "kms_region" {
   description = "The region in which KMS instance exists."
 }
 
-variable "existing_kms_guid" {
+variable "existing_kms_crn" {
   type        = string
   default     = null
   description = "The GUID of the KMS instance that is used for the Object Storage bucket root key. Required only if a KMS root key is specified and if `skip_iam_authorization_policy` is true."
@@ -22,7 +22,7 @@ variable "existing_kms_guid" {
 
 variable "skip_iam_authorization_policy" {
   type        = bool
-  description = "Set to true to skip the creation of an IAM authorization policy that permits the Object Storage instance created to read the encryption key from the KMS instance in `existing_kms_guid`. WARNING: An authorization policy must exist before an encrypted bucket can be created"
+  description = "Set to true to skip the creation of an IAM authorization policy that permits the Object Storage instance created to read the encryption key from the KMS instance in `existing_kms_crn`. WARNING: An authorization policy must exist before an encrypted bucket can be created"
   default     = false
 }
 
