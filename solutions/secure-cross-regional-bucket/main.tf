@@ -4,14 +4,14 @@
 
 locals {
   # tflint-ignore: terraform_unused_declarations
-  validate_inputs = var.existing_kms_key_crn == null && var.existing_kms_guid == null ? tobool("A value must be passed for 'existing_kms_guid' if not supplying any value for 'existing_kms_key_crn'.") : true
-
+  validate_inputs   = var.existing_kms_key_crn == null && var.existing_kms_crn == null ? tobool("A value must be passed for 'existing_kms_crn' if not supplying any value for 'existing_kms_key_crn'.") : true
+  existing_kms_guid = var.existing_kms_key_crn == null && var.existing_kms_crn == null ? null : element(split(":", var.existing_kms_key_crn), length(split(":", var.existing_kms_key_crn)) - 3)
   bucket_config = [{
     access_tags                   = var.bucket_access_tags
     bucket_name                   = var.bucket_name
     kms_encryption_enabled        = true
     add_bucket_name_suffix        = var.add_bucket_name_suffix
-    kms_guid                      = var.existing_kms_guid
+    kms_guid                      = local.existing_kms_guid
     kms_key_crn                   = var.existing_kms_key_crn != null ? var.existing_kms_key_crn : module.kms[0].keys[format("%s.%s", var.key_ring_name, var.key_name)].crn
     skip_iam_authorization_policy = var.skip_iam_authorization_policy
     management_endpoint_type      = var.management_endpoint_type_for_bucket
@@ -47,6 +47,7 @@ locals {
       permanent = var.retention_permanent
     } : null
   }]
+  bucket = module.cos.buckets[0]
 }
 
 #######################################################################################################################
@@ -60,10 +61,10 @@ module "kms" {
   }
   count                       = var.existing_kms_key_crn != null ? 0 : 1 # no need to create any KMS resources if passing an existing key.
   source                      = "terraform-ibm-modules/kms-all-inclusive/ibm"
-  version                     = "4.11.2"
+  version                     = "4.15.2"
   create_key_protect_instance = false
   region                      = var.kms_region
-  existing_kms_instance_guid  = var.existing_kms_guid
+  existing_kms_instance_crn   = var.existing_kms_crn
   key_ring_endpoint_type      = var.kms_endpoint_type
   key_endpoint_type           = var.kms_endpoint_type
   keys = [

@@ -7,13 +7,13 @@ module "resource_group" {
     ibm = ibm.cos
   }
   source                       = "terraform-ibm-modules/resource-group/ibm"
-  version                      = "1.1.5"
+  version                      = "1.1.6"
   resource_group_name          = var.existing_resource_group == false ? var.resource_group_name : null
   existing_resource_group_name = var.existing_resource_group == true ? var.resource_group_name : null
 }
 
 locals {
-  kms_guid    = var.create_kms_instance && var.existing_kms_guid != null ? var.existing_kms_guid : module.kms.kms_guid
+  kms_guid    = var.create_kms_instance && var.existing_kms_crn != null ? element(split(":", var.existing_kms_crn), length(split(":", var.existing_kms_crn)) - 3) : module.kms.kms_guid
   kms_key_crn = var.existing_kms_key_crn != null ? var.existing_kms_key_crn : module.kms.keys[format("%s.%s", var.key_ring_name, var.key_name)].crn
   bucket_config = [{
     access_tags                   = var.bucket_access_tags
@@ -73,9 +73,9 @@ module "kms" {
     ibm = ibm.kms
   }
   source                      = "terraform-ibm-modules/kms-all-inclusive/ibm"
-  version                     = "4.11.2"
+  version                     = "4.15.2"
   create_key_protect_instance = var.create_kms_instance
-  existing_kms_instance_guid  = var.existing_kms_guid
+  existing_kms_instance_crn   = var.existing_kms_crn
   resource_group_id           = module.resource_group.resource_group_id
   region                      = var.kms_region
   key_ring_endpoint_type      = var.kms_endpoint_type
@@ -140,7 +140,7 @@ module "reader_service_id" {
     ibm = ibm.cos
   }
   source  = "terraform-ibm-modules/iam-service-id/ibm"
-  version = "1.1.2"
+  version = "1.1.3"
   # insert the 2 required variables here
   iam_service_id_name        = local.reader_service_id_name
   iam_service_id_tags        = []
@@ -160,7 +160,7 @@ module "writer_service_id" {
     ibm = ibm.cos
   }
   source                     = "terraform-ibm-modules/iam-service-id/ibm"
-  version                    = "1.1.2"
+  version                    = "1.1.3"
   iam_service_id_name        = local.writer_service_id_name
   iam_service_id_tags        = []
   iam_service_id_description = local.writer_service_id_description
@@ -179,7 +179,7 @@ module "read_write_service_id" {
     ibm = ibm.cos
   }
   source                     = "terraform-ibm-modules/iam-service-id/ibm"
-  version                    = "1.1.2"
+  version                    = "1.1.3"
   iam_service_id_name        = local.writer_service_id_name
   iam_service_id_tags        = []
   iam_service_id_description = local.writer_service_id_description
